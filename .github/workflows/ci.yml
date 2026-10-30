@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Install libusb build tools (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf autoconf-archive automake libtool libudev-dev pkg-config
+
+      - name: Install libusb build tools (macOS)
+        if: runner.os == 'macOS'
+        run: brew install autoconf autoconf-archive automake libtool
+
+      - name: Configure
+        run: cmake -S . -B build -DENABLE_TEST=ON -DENABLE_BUILD_EXAMPLE=ON
+
+      - name: Build libraries, tests, and examples
+        run: cmake --build build --config Release --parallel 2
+
+      - name: Run all tests
+        run: ctest --test-dir build --build-config Release --output-on-failure
+
+      - name: Upload vcpkg logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vcpkg-logs-${{ matrix.os }}
+          path: |
+            build/vcpkg-manifest-install.log
+            ThirdParty/vcpkg/buildtrees/libusb/config-*.log
+          if-no-files-found: ignore

@@ -1,0 +1,48 @@
+name: Bug report
+description: Report a reproducible bug in UsbEngine.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Please search existing issues first. Do not include private firmware or sensitive USB captures.
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+      placeholder: Commit SHA or release tag
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Operating system and compiler
+      placeholder: Windows 11, Visual Studio 2022 / Ubuntu 24.04, GCC 13
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: USB device
+      description: Include VID/PID and mode (DFU or Fastboot) when relevant.
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the exact error and relevant logs. Redact private data.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
